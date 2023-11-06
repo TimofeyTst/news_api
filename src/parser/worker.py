@@ -1,3 +1,6 @@
+from src.dataset.utils import save_metadata
+
+
 class Worker:
     def __init__(self, client, session):
         self.client = client
@@ -12,7 +15,9 @@ class Worker:
                 break
 
             parsed_data = await self.client.parser.process_data(self.session, data)
-            await self.client.save(parsed_data)
+
+            async with self.client.lock:
+                await save_metadata(self.client.db, *parsed_data)
 
             self.client.processed_urls += 1
             if self.client.debug:

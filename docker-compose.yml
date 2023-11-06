@@ -30,8 +30,25 @@ services:
     ports:
       - "5432:5432"
 
+  test_db:
+    container_name: test_db
+    hostname: test_db
+    image: library/postgres:14.1
+
+    environment:
+      - POSTGRES_USER=test
+      - POSTGRES_PASSWORD=test
+      - POSTGRES_DB=test
+    volumes:
+      - news_test_pg_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+
 volumes:
   news_pg_data:
+    driver: "local"
+
+  news_test_pg_data:
     driver: "local"
 
 networks:

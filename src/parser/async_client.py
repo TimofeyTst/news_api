@@ -3,7 +3,6 @@ import asyncio
 import aiohttp
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.dataset.utils import save_metadata
 from src.parser.worker import Worker
 
 
@@ -22,6 +21,7 @@ class Client:
         self.parser = parser
         self.debug = debug
         self.que = asyncio.Queue()
+        self.lock = asyncio.Lock()
         self.processed_urls = 0
         self.db = db
 
@@ -38,6 +38,3 @@ class Client:
 
             await self.que.put(None)
             await asyncio.gather(*workers)
-
-    async def save(self, data):
-        await save_metadata(self.db, *data)
