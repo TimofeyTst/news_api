@@ -1,4 +1,4 @@
-from sqlalchemy import insert, select
+from sqlalchemy import func, insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.dataset.schemas import DatasetRead
@@ -94,10 +94,35 @@ async def read_texts(db: AsyncSession, skip: int = 0, limit: int = 100) -> Datas
     result = await db.execute(query)
     return result.scalars().all()
 
+
+async def read_texts_info(db: AsyncSession, skip: int = 0, limit: int = 100):
+    # query = select(Text.id, Text.timestamp).offset(skip).limit(limit)
+    query = select(Text).add_columns(Text.id, Text.timestamp).offset(skip).limit(limit)
+
+    result = await db.execute(query)
+    return result.scalars().all()
+
+
+async def read_repeated_titles(
+    db: AsyncSession, skip: int = 0, limit: int = 100
+) -> list[TextRead]:
+    query = (
+        select(Text.title)
+        .group_by(Text.title)
+        .having(func.count(Text.title) > 1)
+        .offset(skip)
+        .limit(limit)
+    )
+
+    result = await db.execute(query)
+    return result.scalars().all()
+
+
 async def read_text_by_title(db: AsyncSession, title: str) -> SourceRead:
     query = select(Text).where(Text.title == title)
     result = await db.execute(query)
     return result.scalars().first()
+
 
 async def create_text(db: AsyncSession, text: TextCreate) -> TextRead:
     insert_query = insert(Text).values(**text.model_dump()).returning(Text)

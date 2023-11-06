@@ -1,19 +1,22 @@
 from fastapi import APIRouter, Depends
+from fastapi.responses import FileResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database import get_async_session
 from src.dataset.schemas import DatasetRead
+from src.schemas import TextRead
 
 router = APIRouter()
 
 from src.dataset.service import (
     insert_test_dataset,
     read_categories,
+    read_repeated_titles,
     read_sources,
     read_super_categories,
     read_texts,
 )
-from src.dataset.utils import get_metadata, save_metadata
+from src.dataset.utils import get_metadata, make_dataset_files, save_metadata
 
 
 @router.get("", response_model=DatasetRead)
@@ -33,6 +36,30 @@ async def get_dataset(
     }
 
 
+import shutil
+from pathlib import Path
+
+
+@router.get("/download_db_zip")
+async def download_db_zip(
+    filename: str = "archive_db", db: AsyncSession = Depends(get_async_session)
+):
+    # Путь к сформированной директории
+    db_path = await make_dataset_files(db)
+    # Создаем временный каталог для архива
+    temp_dir = Path("tmp")
+    temp_dir.mkdir(parents=True, exist_ok=True)
+
+    # Создаем zip-архив
+    shutil.make_archive(temp_dir / filename, "zip", "tmp", db_path)
+
+    # Отправляем zip-архив в ответе
+    return FileResponse(
+        temp_dir / f"{filename}.zip",
+        headers={"Content-Disposition": f"attachment; filename={filename}.zip"},
+    )
+
+
 @router.get("/check_source")
 async def get_exist_source(
     db: AsyncSession = Depends(get_async_session), new_name: str = "Yahoo"
@@ -42,13 +69,21 @@ async def get_exist_source(
     return {"status": exists}
 
 
+@router.get("/repeated_titles", response_model=list[TextRead])
+async def get_exist_source(
+    skip: int = 0, limit: int = 100, db: AsyncSession = Depends(get_async_session)
+):
+    texts = await read_repeated_titles(db, skip=skip, limit=limit)
+    return texts
+
+
 @router.post("")
 async def create_test_dataset(db: AsyncSession = Depends(get_async_session)):
     await insert_test_dataset(db)
     return {"status": "success"}
 
 
-@router.post("/save_metadata")
+@router.post("/news")
 async def create_new_text(
     src_name: str = "BBC",
     cat_name: str = "Politics",

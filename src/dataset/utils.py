@@ -1,3 +1,6 @@
+import json
+from pathlib import Path
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.dataset.service import (
@@ -12,6 +15,8 @@ from src.dataset.service import (
     read_super_categories,
     read_super_category_by_name,
     read_text_by_title,
+    read_texts,
+    read_texts_info,
 )
 from src.schemas import CategoryCreate, SourceCreate, SuperCategoryCreate, TextCreate
 
@@ -59,3 +64,71 @@ async def save_metadata(db: AsyncSession, src_name, cat_name, supcat_name, title
         supercategory_id=exist_supcat.id,
     )
     await create_text(db, text)
+
+
+async def make_dataset_files(
+    db: AsyncSession, filename="about.json", filepath="tmp/news"
+):
+    sources = await read_sources(db)
+    cats = await read_categories(db)
+    supcats = await read_super_categories(db)
+    texts_info = await read_texts_info(db, skip=0, limit=1000)
+    texts = await read_texts(db, skip=0, limit=1000)
+    await save_text_to_files(texts, filepath)
+
+    about_json = {
+        "sources": [
+            {
+                "id": src.id,
+                "name": src.name,
+            }
+            for src in sources
+        ],
+        "categories": [
+            {
+                "id": cat.id,
+                "name": cat.name,
+            }
+            for cat in cats
+        ],
+        "supercategories": [
+            {
+                "id": supcat.id,
+                "name": supcat.name,
+            }
+            for supcat in supcats
+        ],
+        "texts": [
+            {
+                "id": text.id,
+                "file_name": f"news/new_{text.id}/news.txt",
+                "time": text.timestamp.strftime("%m-%d-%Y %H:%M:%S"),
+            }
+            for text in texts_info
+        ],
+    }
+    full_file_path = filepath + "/" + filename
+    files_dir = Path(filepath)
+    files_dir.mkdir(parents=True, exist_ok=True)
+
+    with open(full_file_path, "w") as json_file:
+        json.dump(about_json, json_file, indent=4)
+
+    return "news"
+
+
+async def save_text_to_files(texts, base_dir):
+    for text in texts:
+        # Создаем директорию для каждой новости
+        news_dir = Path(base_dir) / f"news/new_{text.id}"
+        news_dir.mkdir(parents=True, exist_ok=True)
+
+        # Путь к файлу для данной новости
+        file_path = news_dir / "news.txt"
+
+        # Создаем текст для сохранения (title + "\n\n" + body)
+        text_to_save = f"{text.title}\n\n{text.body}"
+
+        # Сохраняем текст в файл
+        with file_path.open("w", encoding="utf-8") as news_file:
+            news_file.write(text_to_save)
