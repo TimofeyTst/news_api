@@ -1,0 +1,73 @@
+name: Publish Web UI Docker Image to Docker Hub
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches: [ '*' ]
+
+jobs:
+  docker_setup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ secrets.DOCKERHUB_USERNAME }}/eat-place
+          tags: value=rest_api_{{branch}}
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push Dockerfile
+        if: github.ref != 'refs/heads/prod'
+        uses: docker/build-push-action@v5
+        with:
+          push: true
+          file: Dockerfile
+          tags: ${{ steps.meta.outputs.tags }}
+
+      - name: Build and push Dockerfile.prod
+        if: github.ref == 'refs/heads/prod'
+        uses: docker/build-push-action@v5
+        with:
+          push: true
+          file: Dockerfile.prod
+          tags: ${{ steps.meta.outputs.tags }}
+  
+
+  deploy:
+    needs: docker_setup
+    if: github.ref == 'refs/heads/prod'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Uncomment this if you want to trigger production services
+      # - name: Trigger repo
+      #   uses: convictional/trigger-workflow-and-wait@v1.6.1
+      #   with:
+      #     owner: EatPlace
+      #     repo: deploy
+      #     ref: prod
+      #     github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+      #     workflow_file_name: deploy-runners.yml
+      #     client_payload: '{}'
+      #     wait_interval: 11
+      #     trigger_workflow: true
+      #     wait_workflow: true
+      #     propagate_failure: true

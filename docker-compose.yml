@@ -1,0 +1,40 @@
+version: '3.7'
+
+services:
+  news_api:
+    container_name: news_api
+    image: news_api
+    env_file:
+      - .env
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./:/src
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+
+  db:
+    container_name: db
+    hostname: db
+    image: library/postgres:14.1
+
+    environment:
+      - POSTGRES_USER=news
+      - POSTGRES_PASSWORD=news
+      - POSTGRES_DB=news
+    volumes:
+      - news_pg_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+volumes:
+  news_pg_data:
+    driver: "local"
+
+networks:
+  default:
+    external: true
+    name: news_api
