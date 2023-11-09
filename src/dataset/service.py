@@ -95,6 +95,27 @@ async def read_texts(db: AsyncSession, skip: int = 0, limit: int = 100) -> Datas
     return result.scalars().all()
 
 
+async def read_texts_count(db: AsyncSession) -> int:
+    query = select(func.count()).select_from(Text)
+
+    result = await db.execute(query)
+    return result.scalar()
+
+
+async def read_oldest_text_date(db: AsyncSession):
+    query = select(func.min(Text.timestamp)).select_from(Text)
+
+    result = await db.execute(query)
+    return result.scalar()
+
+
+async def read_newest_text_date(db: AsyncSession):
+    query = select(func.max(Text.timestamp)).select_from(Text)
+
+    result = await db.execute(query)
+    return result.scalar()
+
+
 async def read_texts_info(db: AsyncSession, skip: int = 0, limit: int = 100):
     # query = select(Text.id, Text.timestamp).offset(skip).limit(limit)
     query = select(Text).add_columns(Text.id, Text.timestamp).offset(skip).limit(limit)

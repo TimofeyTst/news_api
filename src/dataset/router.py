@@ -8,13 +8,19 @@ from src.schemas import TextRead
 
 router = APIRouter()
 
+import shutil
+from pathlib import Path
+
 from src.dataset.service import (
     insert_test_dataset,
     read_categories,
+    read_newest_text_date,
+    read_oldest_text_date,
     read_repeated_titles,
     read_sources,
     read_super_categories,
     read_texts,
+    read_texts_count,
 )
 from src.dataset.utils import get_metadata, make_dataset_files, save_metadata
 
@@ -36,8 +42,17 @@ async def get_dataset(
     }
 
 
-import shutil
-from pathlib import Path
+@router.get("/total_news")
+async def get_dataset(db: AsyncSession = Depends(get_async_session)):
+    texts_count = await read_texts_count(db)
+    oldest_date = await read_oldest_text_date(db)
+    newest_date = await read_newest_text_date(db)
+
+    return {
+        "texts_count": texts_count,
+        "oldest_text_date": oldest_date,
+        "newest_text_date": newest_date,
+    }
 
 
 @router.get("/download_db_zip")

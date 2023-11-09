@@ -83,11 +83,11 @@ async def save_metadata(
 async def make_dataset_files(
     db: AsyncSession, filename="about.json", filepath="tmp/news"
 ):
-    sources = await read_sources(db)
-    cats = await read_categories(db)
-    supcats = await read_super_categories(db)
-    texts_info = await read_texts_info(db, skip=0, limit=1000)
-    texts = await read_texts(db, skip=0, limit=1000)
+    sources = await read_sources(db, skip=0, limit=1000)
+    cats = await read_categories(db, skip=0, limit=1000)
+    supcats = await read_super_categories(db, skip=0, limit=10000)
+    texts_info = await read_texts_info(db, skip=0, limit=10000)
+    texts = await read_texts(db, skip=0, limit=10000)
     await save_text_to_files(texts, filepath)
 
     about_json = {
