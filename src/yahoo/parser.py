@@ -18,7 +18,7 @@ class YahooParser(Parser):
         super().__init__(tickers)
 
     def get_data(self):
-        source = "Yahoo"
+        source = "Yahoo Finance"
         category = "Investments"
         for ticker in TICKERS.split():
             api = yf.Ticker(ticker)
