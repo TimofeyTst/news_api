@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 from pathlib import Path
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -33,7 +34,16 @@ async def get_metadata(db: AsyncSession):
     return source_names, cats_names, supcats_names
 
 
-async def save_metadata(db: AsyncSession, src_name, cat_name, supcat_name, title, body):
+async def save_metadata(
+    db: AsyncSession,
+    src_name,
+    cat_name,
+    supcat_name,
+    title,
+    body,
+    timestamp=None,
+    link=None,
+):
     exist_title = await read_text_by_title(db, title)
     if exist_title:
         return
@@ -54,11 +64,15 @@ async def save_metadata(db: AsyncSession, src_name, cat_name, supcat_name, title
             db, SuperCategoryCreate(name=supcat_name)
         )
 
+    if timestamp is None:
+        timestamp = datetime.utcnow()
+
     # Теперь создаем полученную новость
     text = TextCreate(
         title=title,
         body=body,
-        link=None,
+        link=link,
+        timestamp=timestamp,
         source_id=exist_src.id,
         category_id=exist_cat.id,
         supercategory_id=exist_supcat.id,

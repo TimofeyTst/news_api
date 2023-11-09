@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import aiohttp
 import yfinance as yf
 from bs4 import BeautifulSoup
@@ -10,9 +12,10 @@ from src.parser.abstract_parser import Parser
 # для указанной ссылки на компанию проходит по всем новостям
 # и отправляет в self.callback
 class YahooParser(Parser):
+    root = "https://finance.yahoo.com"
+
     def __init__(self, tickers=TICKERS):
         super().__init__(tickers)
-        self.root = "https://finance.yahoo.com"
 
     def get_data(self):
         source = "Yahoo"
@@ -26,8 +29,8 @@ class YahooParser(Parser):
     async def process_data(self, session, data):
         src, cat, supcat, url = data
         news = await self.fetch_url(session, url)
-        title, body = self.parse_news_text(news)
-        return [src, cat, supcat, title, body]
+        title, body, timestamp = self.parse_news_text(news)
+        return [src, cat, supcat, title, body, timestamp, url]
 
     async def fetch_url(self, session, url):
         try:
@@ -41,21 +44,29 @@ class YahooParser(Parser):
         return None
 
     def parse_news_text(self, html_text):
-        soup = BeautifulSoup(html_text, "html.parser")
+        soup = BeautifulSoup(html_text, "lxml")
 
         # Ищем заголовок новости
-        title = soup.select_one("h1")
+        title = soup.find("div", class_="caas-title-wrapper")
         if title:
             news_title = title.text.strip()
         else:
             news_title = ""
 
         # Ищем тело новости
-        body = soup.select(
-            "div article div div div div div div.caas-content-wrapper > div.caas-body"
-        )
+        body = soup.find("div", class_="caas-body")
+        if body:
+            news_content = body.text
+        else:
+            news_content = ""
 
-        # Извлекаем текст из каждого элемента p и объединяем его
-        news_content = "\n\n".join([p.text.strip() for p in body])
+        time_tag = soup.find("time")
+        if time_tag:
+            datetime_string = time_tag.get("datetime")
+            datetime_object = datetime.strptime(
+                datetime_string, "%Y-%m-%dT%H:%M:%S.%fZ"
+            )
+        else:
+            datetime_object = None
 
-        return news_title, news_content
+        return news_title, news_content, datetime_object

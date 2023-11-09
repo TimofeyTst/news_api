@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, ConfigDict, HttpUrl
+from pydantic import BaseModel, ConfigDict
 
 
 class SourceBase(BaseModel):
@@ -44,7 +44,8 @@ class SuperCategoryRead(SuperCategoryBase):
 class TextBase(BaseModel):
     title: str
     body: str
-    link: Optional[HttpUrl]
+    link: Optional[str]
+    timestamp: Optional[datetime]
     source_id: int
     category_id: int
     supercategory_id: int

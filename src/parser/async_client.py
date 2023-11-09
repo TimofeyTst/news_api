@@ -25,16 +25,20 @@ class Client:
         self.processed_urls = 0
         self.db = db
 
+    async def create_tasks(self):
+        for data in self.parser.get_data():
+            await self.que.put(data)
+        await self.que.put(None)
+
     async def start(self):
         async with aiohttp.ClientSession() as session:
             # Создание асинхронных задач
-            workers = [Worker(self, session).start() for _ in range(self.task_count)]
+            workers = [self.create_tasks()]
+            workers.extend(
+                [Worker(self, session).start() for _ in range(self.task_count)]
+            )
             if self.debug:
-                self.tasks_created = len(workers)
+                self.tasks_created = len(workers) - 1
                 print(f"\033[33mTasks created: {self.tasks_created}\033[0m")
 
-            for data in self.parser.get_data():
-                await self.que.put(data)
-
-            await self.que.put(None)
             await asyncio.gather(*workers)

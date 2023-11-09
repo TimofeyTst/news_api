@@ -1,6 +1,7 @@
 # Gitignore
 tmp/*
 tmp*
+test.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
