@@ -27,7 +27,7 @@ async def parse_yahoo_file(
     queries_count: int = 1,
     db: AsyncSession = Depends(get_async_session),
 ):
-    filepaths = ["src/yahoo/data/data.json", "src/yahoo/data/data2.json"]
+    filepaths = ["src/yahoo/data/data_38k.json"]
     # Запустить клиент в фоновой задаче
     parser = YahooFileParser(filepaths=filepaths)
     background_tasks.add_task(run_client_in_background, db, queries_count, parser)
