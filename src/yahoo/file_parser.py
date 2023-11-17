@@ -21,3 +21,18 @@ class YahooFileParser(YahooParser):
                     link = entry.get("link", None)
 
                     yield [source, category, ticker, link]
+
+
+class YahooCategoryFileParser(YahooFileParser):
+    def get_data(self):
+        for filepath in self.filepaths:
+            with open(filepath, "r") as file:
+                data = json.load(file)
+
+                for entry in data:
+                    source = entry.get("source_name", None)
+                    category = entry.get("category", None)
+                    ticker = "None"
+                    link = entry.get("link", None)
+
+                    yield [source, category, ticker, link]

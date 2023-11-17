@@ -2,7 +2,7 @@ from fastapi import APIRouter, BackgroundTasks, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database import get_async_session
-from src.yahoo.file_parser import YahooFileParser
+from src.yahoo.file_parser import YahooCategoryFileParser, YahooFileParser
 from src.yahoo.parser import YahooParser
 from src.yahoo.utils import run_client_in_background
 
@@ -27,8 +27,21 @@ async def parse_yahoo_file(
     queries_count: int = 1,
     db: AsyncSession = Depends(get_async_session),
 ):
-    filepaths = ["src/yahoo/data/data_38k.json"]
+    filepaths = ["src/yahoo/data/second_data.json"]
     # Запустить клиент в фоновой задаче
     parser = YahooFileParser(filepaths=filepaths)
+    background_tasks.add_task(run_client_in_background, db, queries_count, parser)
+    return {"status": "started"}
+
+
+@router.post("/parse_categories")
+async def parse_yahoo_file(
+    background_tasks: BackgroundTasks,
+    queries_count: int = 1,
+    db: AsyncSession = Depends(get_async_session),
+):
+    filepaths = ["src/yahoo/data/yahoo_categories.json"]
+    # Запустить клиент в фоновой задаче
+    parser = YahooCategoryFileParser(filepaths=filepaths)
     background_tasks.add_task(run_client_in_background, db, queries_count, parser)
     return {"status": "started"}
