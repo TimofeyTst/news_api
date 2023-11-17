@@ -1,0 +1,11 @@
+Investments https://finance.yahoo.com/
+Investments https://finance.yahoo.com/news/
+Politics https://finance.yahoo.com/live/politics/
+Economic https://finance.yahoo.com/topic/economic-news/
+Morning https://finance.yahoo.com/topic/morning-brief/
+Personal https://finance.yahoo.com/topic/personal-finance-news/
+Crypto https://finance.yahoo.com/topic/crypto/
+Bidenomics https://finance.yahoo.com/bidenomics/
+Earnings https://finance.yahoo.com/topic/earnings/
+Stocks https://finance.yahoo.com/topic/stock-market-news/
+Finance https://finance.yahoo.com/topic/yahoo-finance-originals/
