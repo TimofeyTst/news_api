@@ -2,6 +2,8 @@
 tmp/*
 tmp*
 test.json
+*log.txt
+parsed*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

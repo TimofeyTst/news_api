@@ -4,6 +4,7 @@ from starlette.middleware.cors import CORSMiddleware
 
 from src.config import app_configs, settings
 from src.dataset.router import router as dataset_router
+from src.investing.router import router as investing_router
 from src.yahoo.router import router as yahoo_router
 
 app = FastAPI(**app_configs)
@@ -32,3 +33,4 @@ async def healthcheck() -> dict[str, str]:
 
 app.include_router(dataset_router, prefix="/dataset", tags=["dataset"])
 app.include_router(yahoo_router, prefix="/yahoo", tags=["parser"])
+app.include_router(investing_router, prefix="/investing", tags=["parser"])

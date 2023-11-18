@@ -2,9 +2,9 @@ from fastapi import APIRouter, BackgroundTasks, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database import get_async_session
+from src.parser.utils import run_client_in_background
 from src.yahoo.file_parser import YahooCategoryFileParser, YahooFileParser
 from src.yahoo.parser import YahooParser
-from src.yahoo.utils import run_client_in_background
 
 router = APIRouter()
 
