@@ -86,7 +86,7 @@ async def make_dataset_files(
     sources = await read_sources(db, skip=0, limit=1000)
     cats = await read_categories(db, skip=0, limit=1000)
     supcats = await read_super_categories(db, skip=0, limit=30000)
-    texts_info = await read_texts_info(db, skip=0, limit=30000)
+    # texts_info = await read_texts_info(db, skip=0, limit=30000)
     texts = await read_texts(db, skip=0, limit=30000)
     await save_text_to_files(texts, filepath)
 
@@ -117,8 +117,11 @@ async def make_dataset_files(
                 "id": text.id,
                 "file_name": f"news/new_{text.id}/news.txt",
                 "time": text.timestamp.strftime("%m-%d-%Y %H:%M:%S"),
+                "source_id": text.source_id,
+                "category_id": text.category_id,
+                "supercategory_id": text.supercategory_id,
             }
-            for text in texts_info
+            for text in texts
         ],
     }
     full_file_path = filepath + "/" + filename
