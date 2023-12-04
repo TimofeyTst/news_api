@@ -11,7 +11,7 @@ docker compose exec news_api migrate
 ```
 
 ## Parsing
-Парсинг с сайта yahoo.com при помощи Selenium с указанием файла для чтения и для сохранения, а также с указанием времени ожидания selenium webdriver
+### Парсинг с сайта yahoo.com при помощи Selenium с указанием файла для чтения и для сохранения, а также с указанием времени ожидания selenium webdriver
 
 - -s файл для сохранения
 - -t время ожидания selenium webdriver 
@@ -27,12 +27,12 @@ cd src/parser/selenium
 python3 parse_news_links.py yahoo_urls.txt -t 40
 ```
 
-Парсинг с сайта investing.com и запись в директорию data/parsed .json файлов в количестве равном числу задач
+### Парсинг с сайта investing.com и запись в директорию data/parsed .json файлов в количестве равном числу задач
 ```bash
 cd src/investing
 python3 investing.py
 ```
-Полученные файлы используются в маршруте этого роутера
+Полученные файлы используются в ендпоинте роутера src/investing/router.py
 
 ## Commands
 ### Migrations

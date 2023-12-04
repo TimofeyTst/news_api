@@ -17,7 +17,6 @@ from src.dataset.service import (
     read_super_category_by_name,
     read_text_by_title,
     read_texts,
-    read_texts_info,
 )
 from src.schemas import CategoryCreate, SourceCreate, SuperCategoryCreate, TextCreate
 
