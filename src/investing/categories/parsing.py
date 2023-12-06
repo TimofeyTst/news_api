@@ -82,9 +82,12 @@ def parse_date(time_span):
 
 
 def parse_news_content(html_text):
-    soup = BeautifulSoup(html_text, "html.parser")
-    body = soup.find("div", class_="articlePage")
-    content = body.find_all(["p", "h2"], recursive=False)
+    try:
+        soup = BeautifulSoup(html_text, "html.parser")
+        body = soup.find("div", class_="articlePage")
+        content = body.find_all(["p", "h2"], recursive=False)
 
-    result_content = " ".join(tag.get_text(strip=True) for tag in content)
-    return result_content
+        result_content = " ".join(tag.get_text(strip=True) for tag in content)
+        return result_content
+    except Exception:
+        return None

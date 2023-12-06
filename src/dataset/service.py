@@ -1,4 +1,4 @@
-from sqlalchemy import func, insert, select
+from sqlalchemy import asc, extract, func, insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.dataset.schemas import DatasetRead
@@ -171,3 +171,42 @@ async def insert_test_dataset(db: AsyncSession):
     db.add_all([source, cat, supcat, text])
 
     await db.commit()
+
+
+async def generate_yearly_report(db: AsyncSession):
+    # Получаем уникальные года из таблицы Text
+    query = select(extract("year", Text.timestamp).distinct().label("year")).order_by(
+        asc("year")
+    )
+    result = await db.execute(query)
+    years = result.scalars().all()
+
+    # Формируем отчетность для каждого года
+    yearly_report = []
+    for year in years:
+        year_dict = {"year": year, "total_news": 0, "oldest": None, "newest": None}
+
+        # Получаем общее количество новостей за год
+        count_query = select(func.count()).where(
+            extract("year", Text.timestamp) == year
+        )
+        count_result = await db.execute(count_query)
+        year_dict["total_news"] = count_result.scalar()
+
+        # Получаем самую раннюю новость за год
+        oldest_query = select(func.min(Text.timestamp)).where(
+            extract("year", Text.timestamp) == year
+        )
+        oldest_result = await db.execute(oldest_query)
+        year_dict["oldest"] = oldest_result.scalar()
+
+        # Получаем самую позднюю новость за год
+        newest_query = select(func.max(Text.timestamp)).where(
+            extract("year", Text.timestamp) == year
+        )
+        newest_result = await db.execute(newest_query)
+        year_dict["newest"] = newest_result.scalar()
+
+        yearly_report.append(year_dict)
+
+    return yearly_report

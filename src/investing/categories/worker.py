@@ -24,16 +24,19 @@ async def worker(client):
                 url = f"{client.base_url}{news_url}"
                 res = await client.fetch_url(session, url)
                 body = parse_news_content(res)
+                if body is None:
+                    continue
 
                 async with client.lock:
                     await save_metadata(
                         client.db, source, cat, "None", title, body, timestamp, url
                     )
 
-            client.total_news += len(data)
+            client.total_news += len(news_data)
+            client.total_pages += 1
             if client.logger:
                 client.logger.debug(f"Category: {cat} - parsed links: {len(news_data)}")
                 if client.total_news % 100 == 0:
                     client.logger.info(
-                        f"Client: total parsed news: {client.total_news}"
+                        f"Client: total parsed news: {client.total_news} total pages: {client.total_pages}"
                     )

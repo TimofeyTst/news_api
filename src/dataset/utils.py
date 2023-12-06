@@ -84,9 +84,9 @@ async def make_dataset_files(
 ):
     sources = await read_sources(db, skip=0, limit=1000)
     cats = await read_categories(db, skip=0, limit=1000)
-    supcats = await read_super_categories(db, skip=0, limit=30000)
+    supcats = await read_super_categories(db, skip=0, limit=1000)
     # texts_info = await read_texts_info(db, skip=0, limit=30000)
-    texts = await read_texts(db, skip=0, limit=30000)
+    texts = await read_texts(db, skip=0, limit=300000)
     await save_text_to_files(texts, filepath)
 
     about_json = {

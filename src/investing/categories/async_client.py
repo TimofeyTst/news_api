@@ -27,6 +27,7 @@ class Client:
         self.lock = asyncio.Lock()
         self.worker = worker
         self.total_news = 0
+        self.total_pages = 0
         self.db = db
 
     def start(self):
@@ -74,7 +75,7 @@ class Client:
                 is_next_page = True
                 cat, base_url = line.split()
                 while is_next_page:
-                    url = f"{base_url}/{idx + 20}"
+                    url = f"{base_url}/{idx + 500}"
                     res = await self.fetch_url(session, url)
                     yield cat, res
                     is_next_page = await parse_is_next_page(res)

@@ -3,7 +3,7 @@ from fastapi.responses import FileResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database import get_async_session
-from src.dataset.schemas import DatasetRead
+from src.dataset.schemas import DatasetRead, Report
 from src.schemas import TextRead
 
 router = APIRouter()
@@ -12,6 +12,7 @@ import shutil
 from pathlib import Path
 
 from src.dataset.service import (
+    generate_yearly_report,
     insert_test_dataset,
     read_categories,
     read_newest_text_date,
@@ -90,6 +91,18 @@ async def get_exist_source(
 ):
     texts = await read_repeated_titles(db, skip=skip, limit=limit)
     return texts
+
+
+@router.post("")
+async def create_test_dataset(db: AsyncSession = Depends(get_async_session)):
+    await insert_test_dataset(db)
+    return {"status": "success"}
+
+
+@router.get("/report", response_model=Report)
+async def get_report(db: AsyncSession = Depends(get_async_session)):
+    report = await generate_yearly_report(db)
+    return {"years": report}
 
 
 @router.post("")
